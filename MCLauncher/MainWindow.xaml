@@ -5,7 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MCLauncher.WPFDataTypes"
         mc:Ignorable="d"
-        Title="Minecraft Version Manager" Height="450" Width="800">
+        Title="Minecraft版本管理器" Height="450" Width="800">
+    <!-- <Window.Background>  
+        <ImageBrush ImageSource="pack://application:,,,/MCLauncher;component/background.png" TileMode="Tile" />  
+    </Window.Background> -->
     <Window.Resources>
         <CollectionViewSource
             x:Key="versionListViewRelease"
@@ -23,6 +26,36 @@
             x:Key="versionListViewImported"
             IsLiveFilteringRequested="True"
         />
+
+        <!--
+        <Style x:Key="BorderOnlyButtonStyle" TargetType="{x:Type Button}">  
+        <Setter Property="Background" Value="Transparent"/>  
+        <Setter Property="BorderThickness" Value="1"/>  
+        <Setter Property="BorderBrush" Value="Black"/>  
+        <Setter Property="Template">  
+            <Setter.Value>  
+                <ControlTemplate TargetType="{x:Type Button}">  
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">  
+                        <ContentPresenter x:Name="contentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"   
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"  
+                                          Margin="{TemplateBinding Padding}"/>  
+                    </Border>  
+                    <ControlTemplate.Triggers>  
+                        <Trigger Property="IsMouseOver" Value="True">  
+                            <Setter TargetName="border" Property="BorderBrush" Value="Blue"/>  
+                        </Trigger>  
+                        <Trigger Property="IsPressed" Value="True">  
+                            <Setter TargetName="border" Property="BorderBrush" Value="Red"/>  
+                        </Trigger>  
+                        <Trigger Property="IsEnabled" Value="False">  
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>  
+                        </Trigger>  
+                    </ControlTemplate.Triggers>  
+                </ControlTemplate>  
+            </Setter.Value>  
+        </Setter>  
+    </Style>   
+    -->
         <DataTemplate x:Key="templateVersionNotInstalled" DataType="{x:Type local:Version}">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -35,7 +68,7 @@
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding DisplayName}" FontWeight="Bold" />
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding DisplayInstallStatus}" />
-                <Button x:Name="DownloadButton" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Padding="20,0" Content="Download" Command="{Binding DownloadCommand}" CommandParameter="{Binding}" />
+                <Button x:Name="DownloadButton" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Padding="20,0" Content="下载" Command="{Binding DownloadCommand}" CommandParameter="{Binding}" />
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="templateVersionInstalled" DataType="{x:Type local:Version}">
@@ -101,16 +134,17 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" IsMainMenu="True" Background="Transparent">
-            <MenuItem Header="_File">
-                <MenuItem Header="Open log file" Click="MenuItemOpenLogFileClicked" />
-                <MenuItem Header="Open launcher data folder in Explorer" Click="MenuItemOpenDataDirClicked"/>
-                <MenuItem Header="_Import APPX file" Click="ImportButtonClicked" />
+            <MenuItem Header="_文件">
+                <MenuItem Header="打开日志文件" Click="MenuItemOpenLogFileClicked" />
+                <MenuItem Header="打开启动器文件夹" Click="MenuItemOpenDataDirClicked"/>
+                <MenuItem Header="_导入 APPX 文件" Click="ImportButtonClicked" />
             </MenuItem>
-            <MenuItem Header="_Options">
-                <MenuItem Header="Delete APPX after download to save space" IsCheckable="True" Name="DeleteAppxAfterDownloadOption" Checked="DeleteAppxAfterDownloadCheck_Changed" Unchecked="DeleteAppxAfterDownloadCheck_Changed" IsChecked="{Binding UserPrefs.DeleteAppxAfterDownload }" />
-                <MenuItem Header="Uninstall all versions" Name="CleanupForMicrosoftStoreReinstall" Click="MenuItemCleanupForMicrosoftStoreReinstallClicked" />
-                <MenuItem Header="Refresh version list" Name="RefreshVersionList" Click="MenuItemRefreshVersionListClicked" />
-                <MenuItem Header="Set version list endpoint..." Name="SetVersionListEndpoint" Click="MenuItemSetVersionListEndpointClicked" />
+            <MenuItem Header="_设置">
+                <MenuItem Header="下载后删除 APPX 以节省空间" IsCheckable="True" Name="DeleteAppxAfterDownloadOption" Checked="DeleteAppxAfterDownloadCheck_Changed" Unchecked="DeleteAppxAfterDownloadCheck_Changed" IsChecked="{Binding DeleteAppxAfterDownload }" />
+                <MenuItem Header="每次进入都自动获取新版本列表" IsCheckable="True" Name="AutoFetchNewVersionListOnEntryOption"   Checked="AutoFetchNewVersionListCheckedChanged" Unchecked="AutoFetchNewVersionListCheckedChanged" IsChecked="{Binding AutoFetchNewVersionListOnEntry }" />
+                <MenuItem Header="卸载所有版本" Name="CleanupForMicrosoftStoreReinstall" Click="MenuItemCleanupForMicrosoftStoreReinstallClicked" />
+                <MenuItem Header="刷新版本列表" Name="RefreshVersionList" Click="MenuItemRefreshVersionListClicked" />
+                <MenuItem Header="设置版本列表链接..." Name="SetVersionListEndpoint" Click="MenuItemSetVersionListEndpointClicked" />
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1" Margin="0,5,0,0" BorderThickness="0,1,0,0" Padding="0" Width="Auto">
@@ -134,13 +168,13 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <CheckBox Grid.Row="0" Grid.Column="0" Name="ShowInstalledVersionsOnlyCheckbox" Content="Show installed versions only" Checked="ShowInstalledVersionsOnlyCheckbox_Changed" Unchecked="ShowInstalledVersionsOnlyCheckbox_Changed" IsChecked="{Binding UserPrefs.ShowInstalledOnly }" />
+            <CheckBox Grid.Row="0" Grid.Column="0" Name="ShowInstalledVersionsOnlyCheckbox" Content="仅显示已安装的版本" Checked="ShowInstalledVersionsOnlyCheckbox_Changed" Unchecked="ShowInstalledVersionsOnlyCheckbox_Changed" IsChecked="{Binding UserPrefs.ShowInstalledOnly }" />
             <Grid Name="LoadingProgressGrid" Grid.Row="0" Grid.Column="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" Name="LoadingProgressLabel" Content="Nothing" Padding="0,0,0,0"/>
+                <Label Grid.Row="0" Grid.Column="0" Name="LoadingProgressLabel" Content="无" Padding="0,0,0,0"/>
                 <ProgressBar Grid.Row="0" Grid.Column="1" Name="LoadingProgressBar" Width="100" Margin="5,0,0,0" Maximum="3" Value="2"/>
             </Grid>
         </Grid>

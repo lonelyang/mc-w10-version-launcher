@@ -3,6 +3,8 @@
         public bool ShowInstalledOnly { get; set; } = false;
 
         public bool DeleteAppxAfterDownload { get; set; } = true;
+        
+        public bool AutoFetchNewVersionListOnEntry { get; set; } = true;
 
         public string VersionsApi { get; set; } = "";
     }
